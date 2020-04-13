@@ -4,7 +4,8 @@
 #include "client.h"
 
 extern void Start(char *title);
-extern void NewLine(char *line, double sub_start, double sub_end);
+extern void PosChanged(double pos);
+extern void SubDelayChanged(double delay);
 extern void Stop();
 
 static int
@@ -25,26 +26,19 @@ handle_file_load(mpv_handle *handle)
 }
 
 static void
-handle_prop_event(mpv_handle *handle, mpv_event_property *event_prop)
+handle_prop_event(mpv_handle *handle, int reply_userdata, mpv_event_property *event_prop)
 {
-	char *value;
-	double sub_start = -1, sub_end = -1;
-	int err;
-
-	if (strcmp(event_prop->name, "sub-text") != 0 || event_prop->data == NULL) {
+	if (event_prop->data == NULL) {
 		return;
 	}
-
-	value = *(char **)(event_prop->data);
-	err = mpv_get_property(handle, "sub-start", MPV_FORMAT_DOUBLE, &sub_start);
-	if (err != 0) {
-		sub_start = -1;
+	switch (reply_userdata) {
+	case 1:
+		PosChanged(*(double *)(event_prop->data));
+		break;
+	case 2:
+		SubDelayChanged(*(double *)(event_prop->data));
+		break;
 	}
-	err = mpv_get_property(handle, "sub-end", MPV_FORMAT_DOUBLE, &sub_end);
-	if (err == 0) {
-		sub_end = -1;
-	}
-	NewLine(value, sub_start, sub_end);
 }
 
 int
@@ -60,7 +54,11 @@ mpv_open_cplugin(mpv_handle *handle)
 		return 0;
 	}
 
-	err = mpv_observe_property(handle, 0, "sub-text", MPV_FORMAT_STRING);
+	err = mpv_observe_property(handle, 1, "time-pos", MPV_FORMAT_DOUBLE);
+	if (err != 0) {
+		return err;
+	}
+	err = mpv_observe_property(handle, 2, "sub-delay", MPV_FORMAT_DOUBLE);
 	if (err != 0) {
 		return err;
 	}
@@ -76,7 +74,7 @@ mpv_open_cplugin(mpv_handle *handle)
 			}
 			break;
 		case MPV_EVENT_PROPERTY_CHANGE:
-			handle_prop_event(handle, (mpv_event_property *)event->data);
+			handle_prop_event(handle, event->reply_userdata, (mpv_event_property *)event->data);
 			break;
 		}
 	}

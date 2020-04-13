@@ -66,6 +66,9 @@ func parseAss(file *os.File) ([]LineMsg, error) {
 		start := parseAssTime(p[1])
 		end := parseAssTime(p[2])
 		text := parseAssText(p[9])
+		if text == "" {
+			continue
+		}
 		msg := LineMsg{
 			SubStart: start,
 			SubEnd:   end,

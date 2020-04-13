@@ -45,5 +45,4 @@ using sub-delay.
 ## TODO
 
 - Generate video/audio files or screenshots for the current subtitle.
-- Do not trust mpv's sub-text. It's broken.
 - Implement support for srt subtitles.

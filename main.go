@@ -26,12 +26,15 @@ import (
 )
 
 var (
-	server    *http.Server
-	listeners []chan LineMsg
-	mux       sync.Mutex
-	idCount   int
-	filters   []*regexp.Regexp
-	subs      []LineMsg
+	running      bool
+	server       *http.Server
+	listeners    []chan LineMsg
+	mux          sync.Mutex
+	filters      []*regexp.Regexp
+	subs         []LineMsg
+	currentSub   int
+	currentDelay float64
+	currentPos   float64
 )
 
 type LineMsg struct {
@@ -185,11 +188,32 @@ func parseSubtitleFile() error {
 		return err
 	}
 	defer f.Close()
+	var s []LineMsg
 	switch strings.ToLower(filepath.Ext(file)) {
 	case ".ass":
-		subs, err = parseAss(f)
+		s, err = parseAss(f)
 	default:
 		err = errors.New("unsupported subtitle format")
+	}
+	if err != nil {
+		return err
+	}
+	subs = make([]LineMsg, 0)
+	id := 0
+	for _, sub := range s {
+		m := false
+		for _, filter := range filters {
+			if filter.MatchString(sub.Line) {
+				m = true
+				fmt.Printf("sub %s filtered by regexp %s\n", sub.Line, filter)
+				break
+			}
+		}
+		if !m {
+			sub.Id = id
+			id++
+			subs = append(subs, sub)
+		}
 	}
 	return err
 }
@@ -218,45 +242,51 @@ func Start(title *C.char) {
 	err = parseSubtitleFile()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "mpv-subserv: failed parsing subtitle file: %v\n", err)
+		return
 	}
 
 	go startServer()
+	currentSub = -1
+	running = true
 	fmt.Println("mpv-subserv started")
 }
 
-//export NewLine
-func NewLine(line *C.char, subStart, subEnd float64) {
-	lineStr := C.GoString(line)
-	if strings.TrimSpace(lineStr) == "" {
+func checkSub() {
+	if !running {
 		return
 	}
-	if filters != nil {
-		for _, filter := range filters {
-			if filter.MatchString(lineStr) {
-				return
-			}
+	pos := currentPos - currentDelay
+	latestStart := -1.0
+	var msg LineMsg
+	for _, s := range subs {
+		if pos >= s.SubStart &&
+			pos <= s.SubEnd &&
+			s.SubStart > latestStart {
+			msg = s
+			latestStart = s.SubStart
 		}
 	}
-	msg := LineMsg{
-		Id:       idCount,
-		Line:     lineStr,
-		SubStart: subStart,
-		SubEnd:   subEnd,
-	}
-	if subs != nil {
-		for _, s := range subs {
-			if s.Line == msg.Line {
-				msg.SubEnd = s.SubEnd
-				break
-			}
+
+	if latestStart > -1 && currentSub != msg.Id {
+		currentSub = msg.Id
+		mux.Lock()
+		for _, c := range listeners {
+			c <- msg
 		}
+		mux.Unlock()
 	}
-	idCount++
-	mux.Lock()
-	for _, c := range listeners {
-		c <- msg
-	}
-	mux.Unlock()
+}
+
+//export PosChanged
+func PosChanged(pos float64) {
+	currentPos = pos
+	checkSub()
+}
+
+//export SubDelayChanged
+func SubDelayChanged(delay float64) {
+	currentDelay = delay
+	checkSub()
 }
 
 //export Stop
