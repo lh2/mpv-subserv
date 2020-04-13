@@ -32,15 +32,37 @@ func parseAssTime(timestamp string) float64 {
 	return seconds
 }
 
+func parseAssEscapeSequence(c rune) string {
+	switch c {
+	case '{', '}':
+		return string(c)
+	case 'n', 'N':
+		return "\n"
+	case 'h':
+		return "\u00A0"
+	}
+	return "\\"
+}
+
 func parseAssText(text string) string {
 	cleaned := ""
 	brc := 0
+	escape := false
 	for _, c := range []rune(text) {
+		if escape {
+			cleaned += parseAssEscapeSequence(c)
+			escape = false
+			continue
+		}
 		switch c {
 		case '{':
 			brc++
 		case '}':
 			brc--
+		case '\\':
+			if brc == 0 {
+				escape = true
+			}
 		default:
 			if brc == 0 {
 				cleaned += string(c)
