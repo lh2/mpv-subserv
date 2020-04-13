@@ -269,6 +269,8 @@ func checkSub() {
 
 	if latestStart > -1 && currentSub != msg.Id {
 		currentSub = msg.Id
+		msg.SubStart += currentDelay
+		msg.SubEnd += currentDelay
 		mux.Lock()
 		for _, c := range listeners {
 			c <- msg

@@ -59,10 +59,14 @@ ws.onmessage = function(e) {
 		let li = document.createElement('LI');
 		li.innerText = lastMsg.line;
 		li.setAttribute('data-id', lastMsg.id);
+		li.setAttribute('data-start', lastMsg.sub_start);
+		li.setAttribute('data-end', lastMsg.sub_end);
 		ul.prepend(li);
 	}
 
 	latest.innerText = msg.line;
 	latest.setAttribute('data-id', msg.id)
+	latest.setAttribute('data-start', msg.sub_start)
+	latest.setAttribute('data-end', msg.sub_end)
 };
 `
