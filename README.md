@@ -25,7 +25,7 @@ considerations](#design-considerations)).
 - `MPV_SUBSERV_BROWSER` your browser command, falls back to `BROWSER` or
 `xdg-open`.
 
-## <a name="filter-files"></a>Filter files
+## Filter files
 
 Sometimes, subtitle files contain unwanted noise that you do not want in your
 subtitle list. By specifiying a filter file, you can filter those out.
@@ -34,7 +34,7 @@ A filter file is composed of line seperated regular expressions. If one of them
 matches against a line, it will not be displayed on the web UI. Refer to the [Go
 Documentation](https://golang.org/s/re2syntax) for information about the syntax.
 
-## <a name="design-considerations"></a>Design considerations
+## Design considerations
 
 mpv-subserv has to do it's own subtitle parsing, as mpv's interface for getting
 subtitle data is quite poor. Mpv does not expose how long subtitles are being
@@ -42,7 +42,7 @@ displayed, which will be needed for future functionality (see [TODO](#todo)).
 Also, mpv's sub-text property is not reliable when retiming subtitles on the fly
 using sub-delay.
 
-## <a name="todo"></a>TODO
+## TODO
 
 - Generate video/audio files or screenshots for the current subtitle.
 - Do not trust mpv's sub-text. It's broken.
