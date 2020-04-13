@@ -19,14 +19,13 @@ environment variables:
 - `MPV_SUBSERV` set to `1` to enable the plugin.
 - `MPV_SUBSERV_LANG` will be put in the HTML bodys `lang` attribute. Important for
 CJK languages.
-- `MPV_SUBSERV_FILTER` path to the filter file to use (see [Filter files](#Filter
-files)).
+- `MPV_SUBSERV_FILTER` path to the filter file to use (see [Filter files](#filter-files)).
 - `MPV_SUBSERV_SUBFILE` full path the subtitle file (required, see [Design
-considerations](#Design considerations)).
+considerations](#design-considerations)).
 - `MPV_SUBSERV_BROWSER` your browser command, falls back to `BROWSER` or
 `xdg-open`.
 
-## Filter files
+## <a name="filter-files"></a>Filter files
 
 Sometimes, subtitle files contain unwanted noise that you do not want in your
 subtitle list. By specifiying a filter file, you can filter those out.
@@ -35,15 +34,15 @@ A filter file is composed of line seperated regular expressions. If one of them
 matches against a line, it will not be displayed on the web UI. Refer to the [Go
 Documentation](https://golang.org/s/re2syntax) for information about the syntax.
 
-## Design considerations
+## <a name="design-considerations"></a>Design considerations
 
 mpv-subserv has to do it's own subtitle parsing, as mpv's interface for getting
 subtitle data is quite poor. Mpv does not expose how long subtitles are being
-displayed, which will be needed for future functionality (see [TODO](#TODO)).
+displayed, which will be needed for future functionality (see [TODO](#todo)).
 Also, mpv's sub-text property is not reliable when retiming subtitles on the fly
 using sub-delay.
 
-## TODO
+## <a name="todo"></a>TODO
 
 - Generate video/audio files or screenshots for the current subtitle.
 - Do not trust mpv's sub-text. It's broken.
