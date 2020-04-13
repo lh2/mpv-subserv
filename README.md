@@ -16,15 +16,15 @@ Run `install.sh`
 The plugin is dormant by default and controlled through the following
 environment variables:
 
-`MPV_SUBSERV` set to `1` to enable the plugin.  
-`MPV_SUBSERV_LANG` will be put in the HTML bodys `lang` attribute. Important for
-CJK languages.  
-`MPV_SUBSERV_FILTER` path to the filter file to use (see [Filter files](#Filter
-files)).  
-`MPV_SUBSERV_SUBFILE` full path the subtitle file (required, see [Design
-considerations](#Design considerations)).  
-`MPV_SUBSERV_BROWSER` your browser command, falls back to `BROWSER` or
-`xdg-open`.  
+- `MPV_SUBSERV` set to `1` to enable the plugin.
+- `MPV_SUBSERV_LANG` will be put in the HTML bodys `lang` attribute. Important for
+CJK languages.
+- `MPV_SUBSERV_FILTER` path to the filter file to use (see [Filter files](#Filter
+files)).
+- `MPV_SUBSERV_SUBFILE` full path the subtitle file (required, see [Design
+considerations](#Design considerations)).
+- `MPV_SUBSERV_BROWSER` your browser command, falls back to `BROWSER` or
+`xdg-open`.
 
 ## Filter files
 
